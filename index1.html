@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Location to Telegram</title>
+</head>
+<body>
+    <h1>Send Your Location to Telegram</h1>
+    <button id="getLocationButton">Send Location</button>
+    <p id="status"></p>
+
+    <script>
+        document.getElementById('getLocationButton').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        document.getElementById('status').textContent = 'Location retrieved, sending to Telegram...';
+
+                        const botToken = '6953303172:AAGTWIISatwWXVfl8fusKoIw_lc4ISL-h-s';
+                        const chatId = '1717245674';
+
+                        fetch(`https://api.telegram.org/bot${botToken}/sendLocation`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                chat_id: chatId,
+                                latitude: latitude,
+                                longitude: longitude
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.ok) {
+                                document.getElementById('status').textContent = 'Location sent to Telegram!';
+                            } else {
+                                throw new Error('Failed to send location');
+                            }
+                        })
+                        .catch(error => {
+                            document.getElementById('status').textContent = 'Error sending location.';
+                            console.error('Error:', error);
+                        });
+                    },
+                    function(error) {
+                        document.getElementById('status').textContent = 'Error retrieving location.';
+                        console.error('Error:', error);
+                    }
+                );
+            } else {
+                document.getElementById('status').textContent = 'Geolocation is not supported by this browser.';
+            }
+        });
+    </script>
+</body>
+</html>
